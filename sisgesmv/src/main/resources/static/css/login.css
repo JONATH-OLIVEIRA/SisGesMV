@@ -1,0 +1,17 @@
+.container {
+    max-width: 400px;
+}
+
+.card {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.alert-danger {
+    text-align: center;
+}
+
+.form-control {
+    padding: 12px;
+    font-size: 1rem;
+}

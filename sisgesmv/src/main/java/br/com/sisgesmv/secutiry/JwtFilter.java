@@ -76,15 +76,22 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicRoute(String path) {
-        return path.startsWith("/auth/") ||
+        return path.equals("/") ||
+               path.equals("/index.html") ||
+               path.startsWith("/auth/") ||
                path.equals("/usuarios/cadastrar") ||
                path.equals("/vendedores/cadastrar") ||
+               path.equals("/favicon.ico") ||
                path.startsWith("/css/") ||
                path.startsWith("/js/") ||
                path.startsWith("/images/") ||
+               path.startsWith("/fonts/") ||
+               path.startsWith("/static/") ||
                path.startsWith("/webjars/") ||
                path.startsWith("/v3/api-docs") ||
-               path.startsWith("/swagger-ui");
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/swagger-resources") ||
+               path.equals("/swagger-ui.html");
     }
     
     private String getTokenFromRequest(HttpServletRequest request) {

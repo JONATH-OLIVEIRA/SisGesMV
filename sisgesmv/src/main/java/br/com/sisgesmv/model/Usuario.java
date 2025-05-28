@@ -35,14 +35,14 @@ public class Usuario {
 	@Column(unique = true)
 	private String email;
 
-	@NotBlank(message = "Senha não pode estar vazia")
+	@Column(nullable = false) // Não pode ser nulo no banco
 	@Size(min = 8, message = "A senha deve ter pelo menos 8 caracteres")
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = "A senha deve conter pelo menos 1 letra maiúscula, 1 minúscula e 1 número")
 	private String senha;
 
 	@Past(message = "Data de nascimento deve ser no passado")
 	private LocalDate dtNascimento;
-	
+
 	@NotBlank(message = "CPF é obrigatório")
 	@Pattern(regexp = "\\d{11}", message = "CPF deve conter exatamente 11 dígitos")
 	@Column(unique = true)
@@ -51,8 +51,8 @@ public class Usuario {
 	@Enumerated(EnumType.STRING)
 	private TipoUsuario tipo;
 
-	public Usuario() {		
-		
+	public Usuario() {
+
 	}
 
 	public Usuario(Long id,
@@ -150,5 +150,5 @@ public class Usuario {
 		Usuario other = (Usuario) obj;
 		return Objects.equals(id, other.id);
 	}
-	
+
 }
