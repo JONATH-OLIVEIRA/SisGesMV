@@ -1,192 +1,196 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
         window.location.href = "/login";
         return;
     }
 
-    function formatarData(dataString) {
+    const tabela = document.getElementById("tabelaUsuarios");
+    const form = document.getElementById("cadastroUsuarioForm");
+    const btnCancelar = document.getElementById("btnCancelar");
+    const btnSalvar = document.getElementById("btnSalvar");
+
+    let editandoId = null;
+
+    const apiHeaders = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+
+    // Função para formatar data (para exibição na tabela)
+    const formatarDataExibicao = (dataString) => {
         if (!dataString) return 'N/A';
         try {
             const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
+            return isNaN(data) ? dataString : data.toLocaleDateString('pt-BR');
         } catch (e) {
-            console.error("Erro ao formatar data:", e);
             return dataString;
         }
-    }
+    };
 
+    // Função para formatar data para o input (formato YYYY-MM-DD)
+    const formatarDataInput = (dataString) => {
+        if (!dataString) return '';
+        try {
+            const data = new Date(dataString);
+            if (isNaN(data)) return '';
+            return data.toISOString().split('T')[0];
+        } catch (e) {
+            return '';
+        }
+    };
+
+    // 🔹 Função para carregar usuários
     function carregarUsuarios() {
-        fetch("/usuarios/todos", {
-            method: "GET",
-            headers: { 
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Erro ao carregar usuários");
-            return response.json();
-        })
-        .then(usuarios => {
-            const tabela = document.getElementById("tabelaUsuarios");
-            tabela.innerHTML = '';
+        fetch("/usuarios/todos", { headers: apiHeaders })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Erro ao carregar usuários");
+                }
+                return res.json();
+            })
+            .then(usuarios => {
+                tabela.innerHTML = ''; // Limpa a tabela
+                
+                if (usuarios.length === 0) {
+                    tabela.innerHTML = `
+                        <tr><td colspan="6" class="text-center">Nenhum usuário cadastrado</td></tr>`;
+                    return;
+                }
 
-            if (!usuarios || usuarios.length === 0) {
+                usuarios.forEach(u => {
+                    const row = document.createElement("tr");
+                    row.dataset.id = u.id;
+                    row.innerHTML = `
+                        <td>${u.nome || 'N/A'}</td>
+                        <td>${u.email || 'N/A'}</td>
+                        <td>${u.cpf || 'N/A'}</td>
+                        <td>${formatarDataExibicao(u.dtNascimento)}</td>
+                        <td>${u.tipo || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm me-2" onclick="editarUsuario('${u.id}')">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="excluirUsuario('${u.id}')">Excluir</button>
+                        </td>`;
+                    tabela.appendChild(row);
+                });
+            })
+            .catch(err => {
+                console.error("Erro ao carregar usuários:", err);
                 tabela.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center">Nenhum usuário cadastrado</td>
-                    </tr>
-                `;
-                return;
-            }
-
-            usuarios.forEach(usuario => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-id', usuario.id);
-                row.innerHTML = `
-                    <td>${usuario.nome || 'N/A'}</td>
-                    <td>${usuario.email || 'N/A'}</td>
-                    <td>${usuario.cpf || 'N/A'}</td>
-                    <td>${formatarData(usuario.dtNascimento)}</td>
-                    <td>${usuario.tipo || 'N/A'}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm me-2 btn-editar">Editar</button>
-                        <button class="btn btn-danger btn-sm btn-excluir">Excluir</button>
-                    </td>
-                `;
-                tabela.appendChild(row);
+                    <tr><td colspan="6" class="text-center text-danger">Erro ao carregar usuários</td></tr>`;
             });
-        })
-        .catch(error => {
-            console.error("Erro:", error);
-            document.getElementById("tabelaUsuarios").innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-danger">Erro ao carregar usuários</td>
-                </tr>
-            `;
-        });
     }
 
-    document.getElementById("cadastroUsuarioForm").addEventListener("submit", function(e) {
+    // 🔹 Função para resetar formulário
+    const resetarForm = () => {
+        form.reset();
+        editandoId = null;
+        btnSalvar.textContent = "Cadastrar";
+    };
+
+    // 🔸 Função para salvar usuário (cadastrar/atualizar)
+    form.addEventListener("submit", e => {
         e.preventDefault();
 
-        const novoUsuario = {
-            nome: document.getElementById("nome").value,
-            email: document.getElementById("email").value,
-            cpf: document.getElementById("cpf").value,
-            dtNascimento: document.getElementById("dtNascimento").value,
-            senha: document.getElementById("senha").value,
-            tipo: document.getElementById("tipoUsuario").value
+        const usuario = {
+            nome: form.nome.value.trim(),
+            email: form.email.value.trim(),
+            cpf: form.cpf.value.trim(),
+            dtNascimento: form.dtNascimento.value,
+            tipo: form.tipoUsuario.value
         };
 
-        fetch("/usuarios/cadastrar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify(novoUsuario)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.message || "Erro ao cadastrar usuário");
-                });
-            }
-            return response.json();
-        })
-        .then(() => {
-            alert("Usuário cadastrado com sucesso!");
-            document.getElementById("cadastroUsuarioForm").reset();
-            carregarUsuarios();
-        })
-        .catch(error => {
-            console.error("Erro:", error);
-            alert(error.message);
-        });
-    });
-
-    document.getElementById("tabelaUsuarios").addEventListener("click", function(e) {
-        const row = e.target.closest('tr');
-        if (!row) return;
-
-        const id = row.dataset.id;
-
-        if (!id || isNaN(id)) {
-            console.error("ID inválido:", id);
-            alert("Erro: ID do usuário inválido");
-            return;
+        // Só inclui senha se for um novo usuário
+        if (!editandoId && form.senha.value) {
+            usuario.senha = form.senha.value.trim();
         }
 
-        // Exclusão
-        if (e.target.classList.contains('btn-excluir')) {
-            if (confirm("Tem certeza que deseja excluir este usuário?")) {
-                fetch(`/usuarios/${id}`, {
-                    method: "DELETE",
-                    headers: { 
-                        "Authorization": `Bearer ${token}`
+        const url = editandoId ? `/usuarios/${editandoId}` : "/usuarios/cadastrar";
+        const metodo = editandoId ? "PUT" : "POST";
+
+        fetch(url, {
+            method: metodo,
+            headers: apiHeaders,
+            body: JSON.stringify(usuario)
+        })
+            .then(async res => {
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Erro ao salvar usuário");
+                }
+                return res.json();
+            })
+            .then(() => {
+                alert(editandoId ? "Usuário atualizado com sucesso!" : "Usuário cadastrado com sucesso!");
+                resetarForm();
+                carregarUsuarios();
+            })
+            .catch(err => {
+                console.error("Erro ao salvar usuário:", err);
+                alert(err.message || "Erro ao salvar usuário");
+            });
+    });
+
+    btnCancelar.addEventListener("click", () => {
+        resetarForm();
+    });
+
+    // 🔸 Função para excluir usuário
+    window.excluirUsuario = function(id) {
+        if (confirm("Deseja realmente excluir este usuário?")) {
+            fetch(`/usuarios/${id}`, {
+                method: "DELETE",
+                headers: apiHeaders
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(() => ({}));
+                        throw new Error(errorData.message || "Erro ao excluir usuário");
                     }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Erro ao excluir usuário");
-                    return response.text();
+                    return res.text();
                 })
                 .then(() => {
                     alert("Usuário excluído com sucesso!");
                     carregarUsuarios();
                 })
-                .catch(error => {
-                    console.error("Erro:", error);
-                    alert(error.message || "Erro ao excluir usuário");
+                .catch(err => {
+                    console.error("Erro ao excluir usuário:", err);
+                    alert(err.message || "Erro ao excluir usuário");
                 });
-            }
         }
+    };
 
-        // Edição
-        if (e.target.classList.contains('btn-editar')) {
-            const nome = prompt("Digite o novo nome:", row.children[0].textContent);
-            const email = prompt("Digite o novo email:", row.children[1].textContent);
-            const cpf = prompt("Digite o novo CPF (somente números):", row.children[2].textContent);
-            const dtNascimento = prompt("Digite a nova data de nascimento (AAAA-MM-DD):", new Date(row.children[3].textContent.split('/').reverse().join('-')).toISOString().split('T')[0]);
-            const tipo = prompt("Digite o tipo (USER ou ADMIN):", row.children[4].textContent);
-
-            if (!nome || !email || !cpf || !dtNascimento || !tipo) {
-                alert("Todos os campos são obrigatórios.");
-                return;
-            }
-
-            const usuarioAtualizado = {
-                nome,
-                email,
-                cpf,
-                dtNascimento,
-                tipo
-            };
-
-            fetch(`/usuarios/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(usuarioAtualizado)
+    // 🔸 Função para editar usuário
+    window.editarUsuario = function(id) {
+        fetch(`/usuarios/${id}`, {
+            method: "GET",
+            headers: apiHeaders
+        })
+            .then(async res => {
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Erro ao buscar usuário");
+                }
+                return res.json();
             })
-            .then(response => {
-                if (!response.ok) throw new Error("Erro ao atualizar usuário");
-                return response.json();
+            .then(usuario => {
+                form.nome.value = usuario.nome || '';
+                form.email.value = usuario.email || '';
+                form.cpf.value = usuario.cpf || '';
+                form.dtNascimento.value = formatarDataInput(usuario.dtNascimento);
+                form.tipoUsuario.value = usuario.tipo || '';
+                form.senha.value = ''; // Limpa o campo de senha
+
+                editandoId = id;
+                btnSalvar.textContent = "Atualizar";
+                window.scrollTo({ top: 0, behavior: "smooth" });
             })
-            .then(() => {
-                alert("Usuário atualizado com sucesso!");
-                carregarUsuarios();
-            })
-            .catch(error => {
-                console.error("Erro:", error);
-                alert(error.message || "Erro ao atualizar usuário");
+            .catch(err => {
+                console.error("Erro ao carregar usuário:", err);
+                alert(err.message || "Erro ao carregar dados do usuário");
             });
-        }
-    });
+    };
 
+    // Inicializa a tabela
     carregarUsuarios();
 });

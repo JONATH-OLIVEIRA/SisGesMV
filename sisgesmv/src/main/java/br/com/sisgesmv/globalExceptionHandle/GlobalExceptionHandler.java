@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.sisgesmv.exception.EmailJaCadastradoException;
+import br.com.sisgesmv.exception.ProdutoNaoEncontradoException;
 import br.com.sisgesmv.exception.SenhaIncorretaException;
 import br.com.sisgesmv.exception.UsuarioNaoEncontradoException;
 
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SenhaIncorretaException.class)
     public ResponseEntity<String> handleSenhaIncorreta(SenhaIncorretaException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+    
+    @ExceptionHandler(ProdutoNaoEncontradoException.class)
+    public ResponseEntity<String> handleProdutoNaoEncontrado(ProdutoNaoEncontradoException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 

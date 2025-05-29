@@ -23,7 +23,11 @@ public class AdminFront {
     
     @GetMapping("/admin/gerenciar-usuarios")
     public String gerenciarUsuarios() {
-        return "admin/gerenciar-usuarios"; // Template em src/main/resources/templates/admin/dashboard.html
+        return "admin/gerenciar-usuarios"; 
+    }
+    @GetMapping("/admin/gerenciar-produtos")
+    public String gerenciarProdutos() {
+        return "admin/gerenciar-produtos"; 
     }
     
     @GetMapping("/user/dashboard")

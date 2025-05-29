@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gerenciar Produtos</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Barra de navegação -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/dashboard">Admin Dashboard</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/admin/gerenciar-usuarios">Gerenciar Usuários</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/gerenciar-produtos">Gerenciar Produtos</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="/admin/adminPerfil">Meu Perfil</a></li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light" onclick="localStorage.removeItem('token'); window.location.href='/';">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="container mt-4">
+        <h2>Gerenciar Produtos</h2>
+        <p class="lead">Aqui você pode cadastrar, editar e excluir produtos.</p>
+
+        <!-- Formulário de Cadastro de Produto -->
+        <div class="card p-4 mt-3">
+            <h4>Cadastrar Novo Produto</h4>
+            <form id="cadastroProdutoForm">
+                <div class="mb-3">
+                    <label class="form-label">Nome:</label>
+                    <input type="text" class="form-control" id="nome" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descrição:</label>
+                    <textarea class="form-control" id="descricao" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Preço de Compra:</label>
+                    <input type="number" class="form-control" id="precoCompra" step="0.01" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Preço de Venda:</label>
+                    <input type="number" class="form-control" id="precoVenda" step="0.01" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantidade em Estoque:</label>
+                    <input type="number" class="form-control" id="quantidadeEstoque" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Categoria:</label>
+                    <select class="form-control" id="categoria">
+                        <option value="ELETRONICOS">Eletrônicos</option>
+                        <option value="ROUPAS">Roupas</option>
+                        <option value="ALIMENTOS">Alimentos</option>
+                        <option value="BEBIDAS">Bebidas</option>
+                        <option value="MOVEIS">Móveis</option>
+                        <option value="LIVROS">Livros</option>
+                        <option value="OUTROS">Outros</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Cadastrar Produto</button>
+            </form>
+        </div>
+
+        <!-- Listagem de Produtos -->
+        <div class="mt-4">
+            <h4>Lista de Produtos</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Preço de Venda</th>
+                        <th>Estoque</th>
+                        <th>Categoria</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaProdutos">
+                    <!-- Os produtos serão carregados via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/js/gerenciarProdutos.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
