@@ -50,9 +50,4 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 		window.location.href = '/auth/login?error=' + encodeURIComponent('Erro na conexão com o servidor');
 	}
 });
-// Adicionando evento ao botão de logout
-document.getElementById("logoutBtn").addEventListener("click", function() {
-	localStorage.removeItem("token"); // Remove o token de autenticação
-	window.location.href = "/"; // Redireciona para a página inicial
-});
 

@@ -1,8 +1,11 @@
 package br.com.sisgesmv.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +27,9 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<String> cadastrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Map<String, String>> cadastrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         usuarioService.cadastrarUsuario(usuarioDTO);
-        return ResponseEntity.ok("Usuário cadastrado com sucesso!");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Usuário cadastrado com sucesso!"));
     }
 
     @GetMapping("/{id}")
@@ -41,12 +44,23 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {
-        usuarioService.excluirUsuario(id);
-        return ResponseEntity.ok("Usuário excluído com sucesso!");
+        try {
+            usuarioService.excluirUsuario(id);
+            return ResponseEntity.ok("Usuário excluído com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                   .body("Erro ao excluir usuário: " + e.getMessage());
+        }
     }
 
     @GetMapping("/administradores")
     public ResponseEntity<List<UsuarioDTO>> listarAdministradores() {
         return ResponseEntity.ok(usuarioService.listarAdministradores());
     }
+    @GetMapping("/todos")
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+        List<UsuarioDTO> usuarios = usuarioService.listarTodosUsuarios();
+        return ResponseEntity.ok(usuarios);
+    }
+
 }

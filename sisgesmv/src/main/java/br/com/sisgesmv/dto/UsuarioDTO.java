@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 public class UsuarioDTO {
 
+	private Long id;
     @NotBlank(message = "Nome do usuário não pode estar vazio")
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 e 100 caracteres")
     private String nome;
@@ -32,22 +33,32 @@ public class UsuarioDTO {
 
     public UsuarioDTO() {}
 
-    public UsuarioDTO(String nome, String email, String senha, LocalDate dtNascimento, String cpf, TipoUsuario tipo) {
+    public UsuarioDTO(Long id,String nome, String email, String senha, LocalDate dtNascimento, String cpf, TipoUsuario tipo) {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
         this.dtNascimento = dtNascimento;
         this.cpf = cpf;
         this.tipo = tipo;
+        this.id = id;
     }
 
     // Getters e Setters
 
+    
     public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setNome(String nome) {
         this.nome = nome;
     }
 

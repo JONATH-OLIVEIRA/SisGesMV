@@ -21,6 +21,11 @@ public class AdminFront {
         return "admin/dashboard"; // Template em src/main/resources/templates/admin/dashboard.html
     }
     
+    @GetMapping("/admin/gerenciar-usuarios")
+    public String gerenciarUsuarios() {
+        return "admin/gerenciar-usuarios"; // Template em src/main/resources/templates/admin/dashboard.html
+    }
+    
     @GetMapping("/user/dashboard")
     public String userDashboard() {
         return "user/dashboard"; // Template em src/main/resources/templates/user/dashboard.html
