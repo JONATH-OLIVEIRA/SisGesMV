@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/css/**",
                     "/js/**",
+                    "/pedidos/**",
                     "/images/**",
                     "/fonts/**",
                     "/static/**",

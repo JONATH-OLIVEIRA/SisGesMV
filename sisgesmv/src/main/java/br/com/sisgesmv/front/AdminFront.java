@@ -29,6 +29,10 @@ public class AdminFront {
     public String gerenciarProdutos() {
         return "admin/gerenciar-produtos"; 
     }
+    @GetMapping("/admin/gerenciar-pedidos")
+    public String gerenciarPedidos() {
+        return "admin/gerenciar-pedidos"; 
+    }
     
     @GetMapping("/user/dashboard")
     public String userDashboard() {

@@ -84,6 +84,7 @@ public class JwtFilter extends OncePerRequestFilter {
                path.equals("/favicon.ico") ||
                path.startsWith("/css/") ||
                path.startsWith("/js/") ||
+               path.startsWith("/pedidos/") ||
                path.startsWith("/images/") ||
                path.startsWith("/fonts/") ||
                path.startsWith("/static/") ||

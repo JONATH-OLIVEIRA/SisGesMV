@@ -21,6 +21,7 @@ import br.com.sisgesmv.repository.UsuarioRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UsuarioService {
@@ -36,6 +37,14 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
         this.jwtSecret = jwtSecret;
         this.jwtExpiration = jwtExpiration;
+    }
+    
+    public boolean isGerenteOrAdmin(String cpf) {
+        Usuario funcionario = usuarioRepository.findByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFoundException("Funcionário não encontrado"));
+        
+        return funcionario.getTipo().equals(TipoUsuario.GERENTE) || 
+               funcionario.getTipo().equals(TipoUsuario.ADMIN);
     }
 
     // 🔹 Cadastrar um novo usuário

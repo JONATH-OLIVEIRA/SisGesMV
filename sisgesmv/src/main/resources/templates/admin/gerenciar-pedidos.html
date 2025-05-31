@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gerenciar Pedidos</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Barra de navegação -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Admin Dashboard</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/admin/gerenciar-usuarios">Gerenciar Usuários</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/gerenciar-produtos">Gerenciar Produtos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/admin/gerenciar-pedidos">Gerenciar Pedidos</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="/admin/adminPerfil">Meu Perfil</a></li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light" onclick="localStorage.removeItem('token'); window.location.href='/';">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="container mt-4">
+        <h2>Gerenciamento de Pedidos</h2>
+        <p class="lead">Acompanhe e gerencie os pedidos registrados no sistema.</p>
+
+        <!-- Filtro de Pedidos -->
+        <div class="card p-3">
+            <h4>Filtrar Pedidos por Status</h4>
+            <select class="form-control" id="filtroStatus" onchange="filtrarPedidos()">
+                <option value="TODOS">Todos</option>
+                <option value="PENDENTE">Pendente</option>
+                <option value="APROVADO">Aprovado</option>
+                <option value="SEPARACAO">Separação</option>
+                <option value="PRONTO_PARA_ENTREGA">Pronto_Entrega</option>
+                <option value="ENTREGUE">Entregue</option>
+            </select>
+        </div>
+
+        <!-- Tabela de Pedidos -->
+        <div class="mt-4">
+            <h4>Lista de Pedidos</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vendedor (CPF)</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Código de Entrega</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPedidos">
+                    <!-- Pedidos serão carregados via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/js/gerenciarPedidos.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

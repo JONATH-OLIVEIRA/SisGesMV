@@ -23,7 +23,7 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="/admin/dashboard">Admin Dashboard</a>
         <div class="d-flex">
-            <button class="btn btn-outline-light" onclick="localStorage.removeItem('token'); window.location.href='/login';">Logout</button>
+            <button class="btn btn-outline-light" onclick="localStorage.removeItem('token'); window.location.href='/auth/login';">Logout</button>
         </div>
     </div>
 </nav>
@@ -73,8 +73,9 @@
                     <label class="form-label">Tipo de Usuário:</label>
                     <select class="form-select" id="tipoUsuario" required>
                         <option value="">Selecione</option>
-                        <option value="USER">Usuário Comum</option>
+                        <option value="USER">Vendedor</option>
                         <option value="ADMIN">Administrador</option>
+                        <option value="GERENTE">Usuario</option>
                     </select>
                     <div class="invalid-feedback">Por favor, selecione o tipo de usuário</div>
                 </div>

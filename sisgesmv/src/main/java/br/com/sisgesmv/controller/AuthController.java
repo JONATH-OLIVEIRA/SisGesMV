@@ -72,6 +72,7 @@ public class AuthController {
         return switch (TipoUsuario.valueOf(role)) {
             case ADMIN -> "/admin/dashboard";
             case USER -> "/user/dashboard";
+            case GERENTE -> "/gerente/dashboard";
         };
     }
 
