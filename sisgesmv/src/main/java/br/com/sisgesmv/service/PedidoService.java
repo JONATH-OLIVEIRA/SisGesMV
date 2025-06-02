@@ -35,7 +35,6 @@ import br.com.sisgesmv.repository.PedidoRepository;
 import br.com.sisgesmv.repository.ProdutoRepository;
 import br.com.sisgesmv.repository.UsuarioRepository;
 
-
 @Service
 public class PedidoService {
 
@@ -46,8 +45,8 @@ public class PedidoService {
 
 	private static final Logger log = LoggerFactory.getLogger(PedidoService.class);
 
-	public PedidoService(UsuarioRepository usuarioRepository,PedidoRepository pedidoRepository, ProdutoRepository produtoRepository,
-			PedidoProdutoRepository pedidoProdutoRepository) {
+	public PedidoService(UsuarioRepository usuarioRepository, PedidoRepository pedidoRepository,
+			ProdutoRepository produtoRepository, PedidoProdutoRepository pedidoProdutoRepository) {
 		this.pedidoRepository = pedidoRepository;
 		this.produtoRepository = produtoRepository;
 		this.pedidoProdutoRepository = pedidoProdutoRepository;
@@ -166,69 +165,65 @@ public class PedidoService {
 		return converterParaDTO(pedidoRepository.save(pedido));
 	}
 
-	
-
 	public byte[] gerarRelatorioSeparacaoPDF(Long id) throws IOException {
-	    Pedido pedido = pedidoRepository.findById(id)
-	            .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+		Pedido pedido = pedidoRepository.findById(id)
+				.orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
 
-	    String nomeVendedor = buscarNomePorCpf(pedido.getCpfVendedor());
+		String nomeVendedor = buscarNomePorCpf(pedido.getCpfVendedor());
 
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    PdfWriter writer = new PdfWriter(baos);
-	    PdfDocument pdf = new PdfDocument(writer);
-	    Document document = new Document(pdf);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PdfWriter writer = new PdfWriter(baos);
+		PdfDocument pdf = new PdfDocument(writer);
+		Document document = new Document(pdf);
 
-	    // 📌 Cabeçalho
-	    document.add(new Paragraph("SISTEMA DE GERENCIAMENTO DE PEDIDOS").setBold().setFontSize(14));
-	    document.add(new Paragraph("=========================================\n"));
+		// 📌 Cabeçalho
+		document.add(new Paragraph("SISTEMA DE GERENCIAMENTO DE PEDIDOS").setBold().setFontSize(14));
+		document.add(new Paragraph("=========================================\n"));
 
-	    document.add(new Paragraph("🆔 Pedido ID: " + pedido.getId()));
-	    document.add(new Paragraph("👨‍💼 Vendedor: " + nomeVendedor + " (" + pedido.getCpfVendedor() + ")"));
-	    document.add(new Paragraph("📅 Data do Pedido: " + pedido.getDataPedido().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
-	    document.add(new Paragraph("📌 Status: " + pedido.getStatus() + "\n"));
+		document.add(new Paragraph("🆔 Pedido ID: " + pedido.getId()));
+		document.add(new Paragraph("👨‍💼 Vendedor: " + nomeVendedor + " (" + pedido.getCpfVendedor() + ")"));
+		document.add(new Paragraph(
+				"📅 Data do Pedido: " + pedido.getDataPedido().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+		document.add(new Paragraph("📌 Status: " + pedido.getStatus() + "\n"));
 
-	    document.add(new Paragraph("-----------------------------------------"));
-	    document.add(new Paragraph("🛒 ITENS DO PEDIDO: (Marque os itens separados)"));
-	    document.add(new Paragraph("-----------------------------------------\n"));
+		document.add(new Paragraph("-----------------------------------------"));
+		document.add(new Paragraph("🛒 ITENS DO PEDIDO: (Marque os itens separados)"));
+		document.add(new Paragraph("-----------------------------------------\n"));
 
-	    // 📌 Criando tabela
-	    Table table = new Table(UnitValue.createPercentArray(new float[]{8, 35, 15, 15, 15})).useAllAvailableWidth();
-	    table.addHeaderCell(new Cell().add(new Paragraph("✅ Separado?").setBold()));
-	    table.addHeaderCell(new Cell().add(new Paragraph("Produto").setBold()));
-	    table.addHeaderCell(new Cell().add(new Paragraph("Quantidade").setBold()));
-	    table.addHeaderCell(new Cell().add(new Paragraph("Preço Unitário").setBold()));
-	    table.addHeaderCell(new Cell().add(new Paragraph("Subtotal").setBold()));
+		// 📌 Criando tabela
+		Table table = new Table(UnitValue.createPercentArray(new float[] { 8, 35, 15, 15, 15 })).useAllAvailableWidth();
+		table.addHeaderCell(new Cell().add(new Paragraph("✅ Separado?").setBold()));
+		table.addHeaderCell(new Cell().add(new Paragraph("Produto").setBold()));
+		table.addHeaderCell(new Cell().add(new Paragraph("Quantidade").setBold()));
+		table.addHeaderCell(new Cell().add(new Paragraph("Preço Unitário").setBold()));
+		table.addHeaderCell(new Cell().add(new Paragraph("Subtotal").setBold()));
 
-	    for (PedidoProduto pedidoProduto : pedidoProdutoRepository.findByPedido(pedido)) {
-	        table.addCell("[  ]"); // ✅ Espaço para separador marcar
-	        table.addCell(pedidoProduto.getProduto().getNome());
-	        table.addCell(String.valueOf(pedidoProduto.getQuantidade()));
-	        table.addCell("R$ " + pedidoProduto.getProduto().getPrecoVenda());
-	        table.addCell("R$ " + pedidoProduto.calcularSubtotal());
-	    }
+		for (PedidoProduto pedidoProduto : pedidoProdutoRepository.findByPedido(pedido)) {
+			table.addCell("[  ]"); // ✅ Espaço para separador marcar
+			table.addCell(pedidoProduto.getProduto().getNome());
+			table.addCell(String.valueOf(pedidoProduto.getQuantidade()));
+			table.addCell("R$ " + pedidoProduto.getProduto().getPrecoVenda());
+			table.addCell("R$ " + pedidoProduto.calcularSubtotal());
+		}
 
-	    document.add(table); // 📌 Adicionando tabela ao documento
+		document.add(table); // 📌 Adicionando tabela ao documento
 
-	    document.add(new Paragraph("-----------------------------------------"));
-	    document.add(new Paragraph("💰 VALOR TOTAL DO PEDIDO: R$ " + pedido.getValorTotal()).setBold());
-	    document.add(new Paragraph("========================================="));
-	    document.add(new Paragraph("✅ Este pedido será processado conforme disponibilidade de estoque."));
-	    document.add(new Paragraph("🚚 Aguarde a confirmação de separação e envio."));
-	    document.add(new Paragraph("========================================="));
-	    document.add(new Paragraph("🔹 Separador Responsável: __________________"));
-	    document.add(new Paragraph("🔹 Data de Separação: ____/____/____"));
+		document.add(new Paragraph("-----------------------------------------"));
+		document.add(new Paragraph("💰 VALOR TOTAL DO PEDIDO: R$ " + pedido.getValorTotal()).setBold());
+		document.add(new Paragraph("========================================="));
+		document.add(new Paragraph("✅ Este pedido será processado conforme disponibilidade de estoque."));
+		document.add(new Paragraph("🚚 Aguarde a confirmação de separação e envio."));
+		document.add(new Paragraph("========================================="));
+		document.add(new Paragraph("🔹 Separador Responsável: __________________"));
+		document.add(new Paragraph("🔹 Data de Separação: ____/____/____"));
 
-	    document.close();
-	    return baos.toByteArray();
+		document.close();
+		return baos.toByteArray();
 	}
-
 
 	// 🔹 Método para buscar nome do vendedor pelo CPF
 	private String buscarNomePorCpf(String cpf) {
-	    return usuarioRepository.findByCpf(cpf)
-	            .map(Usuario::getNome)
-	            .orElse("Nome não encontrado");
+		return usuarioRepository.findByCpf(cpf).map(Usuario::getNome).orElse("Nome não encontrado");
 	}
 
 	// 🔹 Converter entidade para DTO com lista de produtos
@@ -272,6 +267,66 @@ public class PedidoService {
 		}
 
 		pedidoRepository.deleteById(id);
+	}
+
+	// 🔹 Editar pedido existente
+	@Transactional
+	public PedidoDTO editarPedido(Long id, PedidoDTO pedidoDTO) {
+		Pedido pedidoExistente = pedidoRepository.findById(id)
+				.orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+
+		// Verifica se o pedido pode ser editado (apenas pedidos pendentes podem ser
+		// editados)
+		if (pedidoExistente.getStatus() != StatusPedido.PENDENTE) {
+			throw new IllegalStateException("Apenas pedidos com status PENDENTE podem ser editados");
+		}
+
+		// Atualiza os dados básicos do pedido
+		pedidoExistente.setCpfVendedor(pedidoDTO.getCpfVendedor());
+
+		// Remove os produtos antigos e devolve ao estoque
+		List<PedidoProduto> produtosAntigos = pedidoProdutoRepository.findByPedido(pedidoExistente);
+		for (PedidoProduto pp : produtosAntigos) {
+			Produto produto = pp.getProduto();
+			produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() + pp.getQuantidade());
+			produtoRepository.save(produto);
+			pedidoProdutoRepository.delete(pp);
+		}
+
+		// Adiciona os novos produtos e atualiza estoque
+		List<PedidoProduto> novosProdutos = pedidoDTO.getPedidoProdutos().stream().map(itemDTO -> {
+			Produto produto = produtoRepository.findById(itemDTO.getProdutoId())
+					.orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado!"));
+
+			if (produto.getQuantidadeEstoque() < itemDTO.getQuantidade()) {
+				throw new IllegalStateException("Estoque insuficiente para o produto: " + produto.getNome());
+			}
+
+			PedidoProduto pedidoProduto = new PedidoProduto();
+			pedidoProduto.setProduto(produto);
+			pedidoProduto.setQuantidade(itemDTO.getQuantidade());
+			pedidoProduto.setPedido(pedidoExistente);
+
+			// Atualiza estoque
+			produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.getQuantidade());
+			produtoRepository.save(produto);
+
+			return pedidoProduto;
+		}).collect(Collectors.toList());
+
+		// Calcula o novo valor total
+		BigDecimal novoValorTotal = novosProdutos.stream().map(PedidoProduto::calcularSubtotal).reduce(BigDecimal.ZERO,
+				BigDecimal::add);
+
+		pedidoExistente.setValorTotal(novoValorTotal);
+
+		// Salva os novos produtos
+		pedidoProdutoRepository.saveAll(novosProdutos);
+
+		// Atualiza o pedido
+		Pedido pedidoAtualizado = pedidoRepository.save(pedidoExistente);
+
+		return converterParaDTO(pedidoAtualizado);
 	}
 
 }

@@ -1,6 +1,30 @@
 document.addEventListener("DOMContentLoaded", function () {
     carregarPedidos();
+    // Carrega os produtos disponíveis quando a página é carregada
+    carregarProdutosDisponiveis();
 });
+
+// Variável global para armazenar os produtos disponíveis
+let produtosDisponiveis = [];
+
+// Função para carregar produtos disponíveis
+function carregarProdutosDisponiveis() {
+    fetch("/produtos/disponiveis", {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Erro ao carregar produtos");
+        }
+        return response.json();
+    })
+    .then(produtos => {
+        produtosDisponiveis = produtos;
+    })
+    .catch(error => console.error("Erro ao carregar produtos:", error));
+}
 
 // 🔹 Buscar pedidos do backend e exibir na tabela
 function carregarPedidos() {
@@ -252,44 +276,74 @@ function cancelarPedido(id) {
 
 // 🔹 Editar pedido (abrindo modal de edição)
 function editarPedido(id) {
-    fetch(`/pedidos/${id}`, {
+    fetch(`/pedidos/${id}/completo`, {
         headers: { 
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json" 
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Erro ao carregar pedido");
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(pedido => {
+        // Preenche os dados básicos
         document.getElementById("modalPedidoId").value = pedido.id;
         document.getElementById("modalCpfVendedor").value = pedido.cpfVendedor;
-        document.getElementById("modalProdutos").value = pedido.produtos.map(p => p.id).join(", ");
+        
+        // Preenche a tabela de itens
+        const tbody = document.getElementById("itensPedidoBody");
+        tbody.innerHTML = '';
+        
+        pedido.pedidoProdutos.forEach(item => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-produto-id', item.produtoId);
+            row.innerHTML = `
+                <td>${item.nomeProduto}</td>
+                <td><input type="number" class="form-control quantidade" value="${item.quantidade}" min="1"></td>
+                <td>R$ ${item.precoUnitario}</td>
+                <td>R$ ${item.subtotal}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="removerItem(this, ${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+                <input type="hidden" class="produto-id" value="${item.produtoId}">
+            `;
+            tbody.appendChild(row);
+        });
+        
+        calcularTotal();
         new bootstrap.Modal(document.getElementById("modalEditarPedido")).show();
     })
-    .catch(error => alert(error.message));
+    .catch(error => console.error('Erro:', error));
 }
 
 // 🔹 Salvar edição de pedido
 function salvarEdicaoPedido() {
-    const id = document.getElementById("modalPedidoId").value;
+    const pedidoId = document.getElementById("modalPedidoId").value;
     const cpfVendedor = document.getElementById("modalCpfVendedor").value;
-    const produtosIds = document.getElementById("modalProdutos").value.split(",").map(p => parseInt(p.trim()));
-
-    fetch(`/pedidos/${id}`, {
+    
+    // Coletar itens da tabela
+    const itens = [];
+    document.querySelectorAll('#itensPedidoBody tr').forEach(row => {
+        itens.push({
+            produtoId: row.querySelector('.produto-id').value,
+            quantidade: parseInt(row.querySelector('.quantidade').value)
+        });
+    });
+    
+    fetch(`/pedidos/${pedidoId}`, {
         method: "PUT",
         headers: { 
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json" 
         },
-        body: JSON.stringify({ cpfVendedor, produtos: produtosIds })
+        body: JSON.stringify({ 
+            cpfVendedor,
+            pedidoProdutos: itens
+        })
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error("Erro ao atualizar pedido");
+            return response.text().then(text => { throw new Error(text) });
         }
         return response.json();
     })
@@ -298,7 +352,10 @@ function salvarEdicaoPedido() {
         carregarPedidos();
         bootstrap.Modal.getInstance(document.getElementById("modalEditarPedido")).hide();
     })
-    .catch(error => alert(error.message));
+    .catch(error => {
+        console.error('Erro:', error);
+        alert("Erro ao atualizar pedido: " + error.message);
+    });
 }
 
 // 🔹 Validação e solicitação de CPF
@@ -325,3 +382,127 @@ function filtrarPedidos() {
         pedido.style.display = (statusSelecionado === "TODOS" || statusSelecionado === status) ? "" : "none";
     });
 }
+
+// Adiciona novo item à tabela
+function adicionarItem() {
+    if (produtosDisponiveis.length === 0) {
+        alert("Carregando produtos disponíveis...");
+        carregarProdutosDisponiveis();
+        return;
+    }
+
+    // Cria um modal simples para seleção
+    let modalContent = `
+        <div class="mb-3">
+            <label class="form-label">Selecione o Produto</label>
+            <select class="form-select" id="selectProdutoModal">
+                ${produtosDisponiveis.map(p => 
+                    `<option value="${p.id}">${p.nome} (Estoque: ${p.quantidadeEstoque}) - R$ ${p.precoVenda}</option>`
+                ).join('')}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Quantidade</label>
+            <input type="number" class="form-control" id="quantidadeProdutoModal" min="1" value="1">
+        </div>
+    `;
+
+    // Usando SweetAlert2 para um modal mais bonito
+    Swal.fire({
+        title: 'Adicionar Produto',
+        html: modalContent,
+        showCancelButton: true,
+        confirmButtonText: 'Adicionar',
+        cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+        preConfirm: () => {
+            const select = document.getElementById('selectProdutoModal');
+            const quantidade = document.getElementById('quantidadeProdutoModal').value;
+            
+            if (!quantidade || quantidade < 1) {
+                Swal.showValidationMessage('Quantidade inválida');
+                return false;
+            }
+            
+            const produtoId = select.value;
+            const produtoSelecionado = produtosDisponiveis.find(p => p.id == produtoId);
+            
+            return {
+                produto: produtoSelecionado,
+                quantidade: parseInt(quantidade)
+            };
+        }
+    }).then(result => {
+        if (result.isConfirmed) {
+            const { produto, quantidade } = result.value;
+            adicionarLinhaItem(produto, quantidade);
+        }
+    });
+}
+
+// Adiciona uma nova linha na tabela de itens
+function adicionarLinhaItem(produto, quantidade) {
+    const tbody = document.getElementById("itensPedidoBody");
+    
+    // Verifica se o produto já existe na tabela
+    const linhaExistente = tbody.querySelector(`tr[data-produto-id="${produto.id}"]`);
+    
+    if (linhaExistente) {
+        // Atualiza a quantidade existente
+        const inputQuantidade = linhaExistente.querySelector('.quantidade');
+        const novaQuantidade = parseInt(inputQuantidade.value) + quantidade;
+        inputQuantidade.value = novaQuantidade;
+        
+        // Dispara o evento de input para recalcular
+        inputQuantidade.dispatchEvent(new Event('input'));
+    } else {
+        // Cria uma nova linha
+        const subtotal = produto.precoVenda * quantidade;
+        const row = document.createElement('tr');
+        row.setAttribute('data-produto-id', produto.id);
+        row.innerHTML = `
+            <td>${produto.nome}</td>
+            <td><input type="number" class="form-control quantidade" value="${quantidade}" min="1"></td>
+            <td>R$ ${produto.precoVenda.toFixed(2)}</td>
+            <td>R$ ${subtotal.toFixed(2)}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="removerItem(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+            <input type="hidden" class="produto-id" value="${produto.id}">
+        `;
+        tbody.appendChild(row);
+    }
+    
+    calcularTotal();
+}
+
+// Remove um item da tabela
+function removerItem(button) {
+    const row = button.closest('tr');
+    row.remove();
+    calcularTotal();
+}
+
+// Calcula o total do pedido
+function calcularTotal() {
+    let total = 0;
+    document.querySelectorAll('#itensPedidoBody tr').forEach(row => {
+        const quantidade = parseFloat(row.querySelector('.quantidade').value);
+        const preco = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('R$ ', ''));
+        total += quantidade * preco;
+    });
+    document.getElementById('pedidoTotal').textContent = `R$ ${total.toFixed(2)}`;
+}
+
+// Atualiza o subtotal quando a quantidade muda
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('quantidade')) {
+        const row = e.target.closest('tr');
+        const preco = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('R$ ', ''));
+        const quantidade = parseFloat(e.target.value);
+        row.querySelector('td:nth-child(4)').textContent = `R$ ${(preco * quantidade).toFixed(2)}`;
+        calcularTotal();
+    }
+});

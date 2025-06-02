@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.sisgesmv.dto.PedidoDTO;
 import br.com.sisgesmv.enums.StatusPedido;
+import br.com.sisgesmv.exception.PedidoNaoEncontradoException;
 import br.com.sisgesmv.service.PedidoService;
 
 @RestController
@@ -98,15 +100,31 @@ public class PedidoController {
 
 	@GetMapping("/{id}/relatorio")
 	public ResponseEntity<byte[]> baixarRelatorioSeparacao(@PathVariable Long id) throws IOException {
-	    log.info("Gerando relatório de separação para o pedido ID: {}", id);
-	    
-	    // 🔹 Agora chamamos `gerarRelatorioSeparacaoPDF()` para gerar o relatório em PDF
-	    byte[] documento = pedidoService.gerarRelatorioSeparacaoPDF(id);
+		log.info("Gerando relatório de separação para o pedido ID: {}", id);
 
-	    return ResponseEntity.ok()
-	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pedido_" + id + ".pdf") // 🔹 Nome correto do arquivo
-	            .contentType(MediaType.APPLICATION_PDF) // 🔹 Definimos que o retorno é um PDF
-	            .body(documento);
+		// 🔹 Agora chamamos `gerarRelatorioSeparacaoPDF()` para gerar o relatório em
+		// PDF
+		byte[] documento = pedidoService.gerarRelatorioSeparacaoPDF(id);
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pedido_" + id + ".pdf")
+				.contentType(MediaType.APPLICATION_PDF) // 🔹 Definimos que o retorno é um PDF
+				.body(documento);
+	}
+
+	@GetMapping("/{id}/completo")
+	public ResponseEntity<PedidoDTO> buscarPedidoCompleto(@PathVariable Long id) {
+		PedidoDTO pedidoDTO = pedidoService.buscarPedidoPorId(id);
+		return ResponseEntity.ok(pedidoDTO);
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<PedidoDTO> atualizarPedido(@PathVariable Long id, @RequestBody PedidoDTO pedidoDTO) {
+		try {
+			PedidoDTO pedidoAtualizado = pedidoService.editarPedido(id, pedidoDTO);
+			return ResponseEntity.ok(pedidoAtualizado);
+		} catch (PedidoNaoEncontradoException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 }
