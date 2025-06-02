@@ -23,12 +23,12 @@ function carregarPedidos() {
 
         pedidos.forEach(pedido => {
             const row = `
-                <tr>
+                <tr data-id="${pedido.id}">
                     <td>${pedido.id}</td>
                     <td>${pedido.cpfVendedor}</td>
                     <td>R$ ${pedido.valorTotal.toFixed(2)}</td>
                     <td><span class="badge bg-${getBadgeClass(pedido.status)}">${pedido.status}</span></td>
-                    <td>${pedido.codigoEntrega || 'N/A'}</td>
+                    <td class="codigo-entrega">${pedido.codigoEntrega || 'N/A'}</td>
                     <td>
                         ${getAcoesPedido(pedido)}
                     </td>
@@ -55,13 +55,19 @@ function getBadgeClass(status) {
 // 🔹 Gera botões de ação com base no status do pedido
 function getAcoesPedido(pedido) {
     let acoes = "";
+    
+    // Botão de baixar relatório disponível para APROVADO e SEPARACAO
+    if (pedido.status === "APROVADO" || pedido.status === "SEPARACAO") {
+        acoes += `<button class="btn btn-sm btn-info me-1" onclick="baixarRelatorio(${pedido.id})">Baixar Relatório</button>`;
+    }
+    
     if (pedido.status === "PENDENTE") {
-        acoes += `<button class="btn btn-sm btn-primary" onclick="aprovarPedido(${pedido.id})">Aprovar</button> `;
-        acoes += `<button class="btn btn-sm btn-warning" onclick="editarPedido(${pedido.id})">Editar</button> `;
+        acoes += `<button class="btn btn-sm btn-primary me-1" onclick="aprovarPedido(${pedido.id})">Aprovar</button> `;
+        acoes += `<button class="btn btn-sm btn-warning me-1" onclick="editarPedido(${pedido.id})">Editar</button> `;
         acoes += `<button class="btn btn-sm btn-danger" onclick="cancelarPedido(${pedido.id})">Cancelar</button>`;
     }
     if (pedido.status === "APROVADO") {
-        acoes += `<button class="btn btn-sm btn-info" onclick="separarPedido(${pedido.id})">Separar</button>`;
+        acoes += `<button class="btn btn-sm btn-primary" onclick="separarPedido(${pedido.id})">Separar</button>`;
     }
     if (pedido.status === "SEPARACAO") {
         acoes += `<button class="btn btn-sm btn-secondary" onclick="marcarProntoParaEntrega(${pedido.id})">Pronto para Entrega</button>`;
@@ -69,7 +75,13 @@ function getAcoesPedido(pedido) {
     if (pedido.status === "PRONTO_PARA_ENTREGA") {
         acoes += `<button class="btn btn-sm btn-dark" onclick="confirmarEntrega(${pedido.id})">Confirmar Entrega</button>`;
     }
+    
     return acoes;
+}
+
+// 🔹 Baixar relatório do pedido
+function baixarRelatorio(id) {
+    window.open(`/pedidos/${id}/relatorio`, '_blank');
 }
 
 // 🔹 Aprovar pedido (movendo para separação)

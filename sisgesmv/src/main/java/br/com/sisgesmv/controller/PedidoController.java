@@ -1,10 +1,11 @@
 package br.com.sisgesmv.controller;
 
-
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +26,7 @@ import br.com.sisgesmv.service.PedidoService;
 public class PedidoController {
 
 	private final PedidoService pedidoService;
-	
+
 	private static final Logger log = LoggerFactory.getLogger(PedidoController.class);
 
 	public PedidoController(PedidoService pedidoService) {
@@ -69,31 +70,27 @@ public class PedidoController {
 
 	// 🔹 Finalizar separação do pedido
 	@PutMapping("/{id}/separar")
-	public ResponseEntity<?> finalizarSeparacao(
-	        @PathVariable Long id,
-	        @RequestBody String cpfSeparador) {
-	    
-	    log.info("Iniciando separação para pedido {} com CPF {}", id, cpfSeparador);
-	    
-	    try {
-	        PedidoDTO pedidoSeparado = pedidoService.finalizarSeparacao(id, cpfSeparador);
-	        log.info("Separação concluída para pedido {}", id);
-	        return ResponseEntity.ok(pedidoSeparado);
-	    } catch (Exception e) {
-	        log.error("Erro na separação do pedido", e);
-	        return ResponseEntity.badRequest().body(e.getMessage());
-	    }
+	public ResponseEntity<?> finalizarSeparacao(@PathVariable Long id, @RequestBody String cpfSeparador) {
+
+		log.info("Iniciando separação para pedido {} com CPF {}", id, cpfSeparador);
+
+		try {
+			PedidoDTO pedidoSeparado = pedidoService.finalizarSeparacao(id, cpfSeparador);
+			log.info("Separação concluída para pedido {}", id);
+			return ResponseEntity.ok(pedidoSeparado);
+		} catch (Exception e) {
+			log.error("Erro na separação do pedido", e);
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	@PutMapping("/{id}/pronto")
 	public ResponseEntity<PedidoDTO> marcarProntoParaEntrega(@PathVariable Long id) {
-	    log.info("Marcando pedido {} como pronto para entrega", id);
-	    PedidoDTO pedido = pedidoService.marcarProntoParaEntrega(id);
-	    return ResponseEntity.ok(pedido);
+		log.info("Marcando pedido {} como pronto para entrega", id);
+		PedidoDTO pedido = pedidoService.marcarProntoParaEntrega(id);
+		return ResponseEntity.ok(pedido);
 	}
 
-	
-	
 	// 🔹 Confirmar entrega com código único
 	@PutMapping("/{id}/entregar")
 	public ResponseEntity<PedidoDTO> confirmarEntrega(@PathVariable Long id, @RequestBody String codigoEntrega) {
@@ -115,4 +112,13 @@ public class PedidoController {
 		pedidoService.excluirPedido(id);
 		return ResponseEntity.ok("Pedido excluído com sucesso!");
 	}
+
+	@GetMapping("/{id}/relatorio")
+	public ResponseEntity<byte[]> baixarRelatorioSeparacao(@PathVariable Long id) throws IOException {
+		byte[] documento = pedidoService.gerarRelatorioSeparacao(id);
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pedido_" + id + ".txt")
+				.body(documento);
+	}
+
 }

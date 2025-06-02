@@ -1,6 +1,8 @@
 package br.com.sisgesmv.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -25,14 +27,14 @@ public class PedidoService {
 
 	private final PedidoRepository pedidoRepository;
 	private final ProdutoRepository produtoRepository;
-	private final UsuarioService usuarioService;
+	
 	
 	private static final Logger log = LoggerFactory.getLogger(PedidoService.class);
 
-	public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository, UsuarioService usuarioService) {
+	public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
 		this.pedidoRepository = pedidoRepository;
 		this.produtoRepository = produtoRepository;
-		this.usuarioService = usuarioService;
+		
 	}
 
 	// 🔹 Criar um novo pedido
@@ -194,6 +196,24 @@ public class PedidoService {
 	public List<PedidoDTO> listarPedidosPorStatus(StatusPedido status) {
 		List<Pedido> pedidos = pedidoRepository.findByStatus(status);
 		return pedidos.stream().map(this::converterParaDTO).collect(Collectors.toList());
+	}
+	public byte[] gerarRelatorioSeparacao(Long id) throws IOException {
+	    Pedido pedido = pedidoRepository.findById(id)
+	            .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+
+	    // Criando o conteúdo do documento
+	    StringBuilder conteudo = new StringBuilder();
+	    conteudo.append("Pedido ID: ").append(pedido.getId()).append("\n");
+	    conteudo.append("Código de Entrega: ").append(pedido.getCodigoEntrega()).append("\n\n");
+	    conteudo.append("Produtos:\n");
+
+	    for (Produto produto : pedido.getProdutos()) {
+	        conteudo.append("🔹 ").append(produto.getNome())
+	                .append(" - Qtd: ").append(produto.getQuantidadeEstoque()).append("\n");
+	    }
+
+	    // Convertendo para byte array (para PDF ou CSV)
+	    return conteudo.toString().getBytes(StandardCharsets.UTF_8);
 	}
 
 }

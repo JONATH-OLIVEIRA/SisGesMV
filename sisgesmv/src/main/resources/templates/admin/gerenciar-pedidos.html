@@ -73,6 +73,33 @@
         </div>
     </div>
 
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="modalEditarPedido" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modalPedidoId">
+                    <div class="mb-3">
+                        <label class="form-label">CPF do Vendedor</label>
+                        <input type="text" class="form-control" id="modalCpfVendedor">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">IDs dos Produtos (separados por vírgula)</label>
+                        <input type="text" class="form-control" id="modalProdutos">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarEdicaoPedido()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/gerenciarPedidos.js"></script>
 
     <!-- Bootstrap JS -->
