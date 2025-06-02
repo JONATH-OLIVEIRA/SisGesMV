@@ -2,10 +2,10 @@ package br.com.sisgesmv.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.sisgesmv.enums.StatusPedido;
-import br.com.sisgesmv.model.Produto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,17 +29,19 @@ public class PedidoDTO {
 
 	private LocalDate dataPedido;
 
-	private List<Produto> produtos;
+	private List<PedidoProdutoDTO> pedidoProdutos; // 🔹 Agora usamos `PedidoProdutoDTO`
 
 	@NotBlank(message = "O código único de entrega é obrigatório.")
-	private String codigoEntrega; // 🔹 Código único de entrega do pedido
+	private String codigoEntrega;
 
 	public PedidoDTO() {
 		this.dataPedido = LocalDate.now();
 	}
+	
+	
 
 	public PedidoDTO(Long id, String cpfVendedor, String cpfGerente, String cpfSeparador, BigDecimal valorTotal,
-			StatusPedido status, LocalDate dataPedido, List<Produto> produtos, String codigoEntrega) {
+			StatusPedido status, LocalDate dataPedido, List<PedidoProdutoDTO> pedidoProdutos, String codigoEntrega) {
 		this.id = id;
 		this.cpfVendedor = cpfVendedor;
 		this.cpfGerente = cpfGerente;
@@ -47,8 +49,16 @@ public class PedidoDTO {
 		this.valorTotal = valorTotal;
 		this.status = status != null ? status : StatusPedido.PENDENTE;
 		this.dataPedido = dataPedido != null ? dataPedido : LocalDate.now();
-		this.produtos = produtos;
+		this.pedidoProdutos = pedidoProdutos; // 🔹 Correção aqui
 		this.codigoEntrega = codigoEntrega;
+	}
+
+	public List<PedidoProdutoDTO> getPedidoProdutos() {
+		return pedidoProdutos != null ? pedidoProdutos : new ArrayList<>();
+	}
+
+	public void setPedidoProdutos(List<PedidoProdutoDTO> pedidoProdutos) {
+		this.pedidoProdutos = pedidoProdutos;
 	}
 
 	public String getCodigoEntrega() {
@@ -114,13 +124,4 @@ public class PedidoDTO {
 	public void setDataPedido(LocalDate dataPedido) {
 		this.dataPedido = dataPedido;
 	}
-
-	public List<Produto> getProdutos() {
-		return produtos;
-	}
-
-	public void setProdutos(List<Produto> produtos) {
-		this.produtos = produtos;
-	}
-	
 }

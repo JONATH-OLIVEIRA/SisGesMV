@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import br.com.sisgesmv.enums.StatusPedido;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,9 +49,8 @@ public class Pedido {
 	@Column(name = "data_pedido", nullable = false)
 	private LocalDate dataPedido = LocalDate.now();
 
-	@ManyToMany
-	@JoinTable(name = "pedido_produto", joinColumns = @JoinColumn(name = "pedido_id"), inverseJoinColumns = @JoinColumn(name = "produto_id"))
-	private List<Produto> produtos;
+	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+	private List<PedidoProduto> pedidoProdutos;
 
 	@NotBlank(message = "O código único de entrega é obrigatório.")
 	@Column(nullable = false, unique = true)
@@ -61,24 +59,21 @@ public class Pedido {
 	public Pedido() {
 	}
 
-	public Pedido(Long id, String cpfVendedor, String cpfGerente, String cpfSeparador, BigDecimal valorTotal,
-			StatusPedido status, LocalDate dataPedido, List<Produto> produtos, String codigoEntrega) {
+	public Pedido(Long id, @NotBlank(message = "O CPF do vendedor é obrigatório.") String cpfVendedor,
+			String cpfGerente, String cpfSeparador,
+			@NotNull(message = "O valor total do pedido é obrigatório.") @Positive(message = "O valor total deve ser positivo.") BigDecimal valorTotal,
+			@NotNull(message = "O status do pedido é obrigatório.") StatusPedido status, LocalDate dataPedido,
+			List<PedidoProduto> pedidoProdutos,
+			@NotBlank(message = "O código único de entrega é obrigatório.") String codigoEntrega) {
+		super();
 		this.id = id;
 		this.cpfVendedor = cpfVendedor;
 		this.cpfGerente = cpfGerente;
 		this.cpfSeparador = cpfSeparador;
 		this.valorTotal = valorTotal;
-		this.status = status != null ? status : StatusPedido.PENDENTE;
-		this.dataPedido = dataPedido != null ? dataPedido : LocalDate.now();
-		this.produtos = produtos;
-		this.codigoEntrega = codigoEntrega;
-	}
-
-	public String getCodigoEntrega() {
-		return codigoEntrega;
-	}
-
-	public void setCodigoEntrega(String codigoEntrega) {
+		this.status = status;
+		this.dataPedido = dataPedido;
+		this.pedidoProdutos = pedidoProdutos;
 		this.codigoEntrega = codigoEntrega;
 	}
 
@@ -138,19 +133,27 @@ public class Pedido {
 		this.dataPedido = dataPedido;
 	}
 
-	public List<Produto> getProdutos() {
-		return produtos;
+	public List<PedidoProduto> getPedidoProdutos() {
+		return pedidoProdutos;
 	}
 
-	public void setProdutos(List<Produto> produtos) {
-		this.produtos = produtos;
+	public void setPedidoProdutos(List<PedidoProduto> pedidoProdutos) {
+		this.pedidoProdutos = pedidoProdutos;
+	}
+
+	public String getCodigoEntrega() {
+		return codigoEntrega;
+	}
+
+	public void setCodigoEntrega(String codigoEntrega) {
+		this.codigoEntrega = codigoEntrega;
 	}
 
 	@Override
 	public String toString() {
 		return "Pedido [id=" + id + ", cpfVendedor=" + cpfVendedor + ", cpfGerente=" + cpfGerente + ", cpfSeparador="
 				+ cpfSeparador + ", valorTotal=" + valorTotal + ", status=" + status + ", dataPedido=" + dataPedido
-				+ ", produtos=" + produtos + ", codigoEntrega=" + codigoEntrega + "]";
+				+ ", pedidoProdutos=" + pedidoProdutos + ", codigoEntrega=" + codigoEntrega + "]";
 	}
 
 	@Override
