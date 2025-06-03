@@ -33,12 +33,6 @@ public class AdminFront {
     public String gerenciarPedidos() {
         return "admin/gerenciar-pedidos"; 
     }
-    
-    @GetMapping("/user/dashboard")
-    public String userDashboard() {
-        return "user/dashboard"; // Template em src/main/resources/templates/user/dashboard.html
-    }
-
     // 🔹 Novo endpoint para "Meu Perfil"
     @GetMapping("/admin/adminPerfil")
     public String adminPerfil() {

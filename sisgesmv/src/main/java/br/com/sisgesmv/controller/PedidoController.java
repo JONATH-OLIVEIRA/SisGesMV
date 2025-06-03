@@ -2,6 +2,7 @@ package br.com.sisgesmv.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -126,5 +126,22 @@ public class PedidoController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	@GetMapping("/{id}/detalhes")
+    public ResponseEntity<?> visualizarDetalhesPedido(@PathVariable Long id) {
+        try {
+            Map<String, Object> detalhes = pedidoService.buscarDetalhesPedido(id);
+            return ResponseEntity.ok(detalhes);
+        } catch (PedidoNaoEncontradoException e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Pedido não encontrado",
+                    "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "Erro ao buscar detalhes do pedido",
+                    "message", e.getMessage()
+            ));
+        }
+    }
 
 }

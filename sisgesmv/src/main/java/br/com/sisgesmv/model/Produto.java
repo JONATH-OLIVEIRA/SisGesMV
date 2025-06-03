@@ -154,4 +154,9 @@ public class Produto {
 				+ ", precoVenda=" + precoVenda + ", quantidadeEstoque=" + quantidadeEstoque + ", categoria=" + categoria
 				+ ", dataCadastro=" + dataCadastro + "]";
 	}
+
+	public Object getQuantidadeVendida() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

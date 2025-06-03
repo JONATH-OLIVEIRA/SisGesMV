@@ -4,10 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
-import com.itextpdf.layout.element.Table;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.UnitValue;
 
 import br.com.sisgesmv.dto.PedidoDTO;
@@ -42,6 +44,10 @@ public class PedidoService {
 	private final ProdutoRepository produtoRepository;
 	private final PedidoProdutoRepository pedidoProdutoRepository;
 	private final UsuarioRepository usuarioRepository;
+	
+	    
+	    
+	   
 
 	private static final Logger log = LoggerFactory.getLogger(PedidoService.class);
 
@@ -52,7 +58,8 @@ public class PedidoService {
 		this.pedidoProdutoRepository = pedidoProdutoRepository;
 		this.usuarioRepository = usuarioRepository;
 	}
-
+	
+	
 	private String gerarCodigoEntrega() {
 		return "PED-" + new Random().nextInt(100000);
 	}
@@ -328,5 +335,40 @@ public class PedidoService {
 
 		return converterParaDTO(pedidoAtualizado);
 	}
+	
+	 public Map<String, Object> buscarDetalhesPedido(Long id) throws PedidoNaoEncontradoException {
+	        Pedido pedido = pedidoRepository.findById(id)
+	                .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
 
+	        String nomeVendedor = buscarNomePorCpf(pedido.getCpfVendedor());
+
+	        Map<String, Object> detalhes = new HashMap<>();
+	        detalhes.put("id", pedido.getId());
+	        detalhes.put("vendedor", nomeVendedor);
+	        detalhes.put("cpfVendedor", pedido.getCpfVendedor());
+	        detalhes.put("dataPedido", pedido.getDataPedido());
+	        detalhes.put("status", pedido.getStatus().toString());
+	        detalhes.put("valorTotal", pedido.getValorTotal());
+	        
+	        detalhes.put("itens", mapearItensPedido(pedido));
+	        
+	        return detalhes;
+	    }
+
+	    private List<Map<String, Object>> mapearItensPedido(Pedido pedido) {
+	        return pedidoProdutoRepository.findByPedido(pedido).stream()
+	                .map(this::mapearItemPedido)
+	                .collect(Collectors.toList());
+	    }
+
+	    private Map<String, Object> mapearItemPedido(PedidoProduto pp) {
+	        Map<String, Object> item = new HashMap<>();
+	        item.put("produto", pp.getProduto().getNome());
+	        item.put("quantidade", pp.getQuantidade());
+	        item.put("precoUnitario", pp.getProduto().getPrecoVenda());
+	        item.put("subtotal", pp.calcularSubtotal());
+	        return item;
+	    }
+	 
+	    
 }

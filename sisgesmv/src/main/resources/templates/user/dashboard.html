@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard do Usuário</title>
+
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="container">
+
+	<!-- Barra de navegação -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/user/dashboard">Meu Dashboard</a>
+
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarNav">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item"><a class="nav-link" href="/user/pedidos">Meus
+							Pedidos</a></li>
+					<li class="nav-item"><a class="nav-link" href="/user/perfil">Meu
+							Perfil</a></li>
+				</ul>
+				<div class="d-flex">
+					<button class="btn btn-outline-light" onclick="logout()">Sair</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Conteúdo Principal -->
+	<div class="container-fluid mt-4">
+		<h2 class="text-center">
+			Bem-vindo, <span id="nomeUsuario"></span>!
+		</h2>
+		<p class="lead text-center">Acompanhe suas atividades e desempenho</p>
+
+		<div class="row mt-4">
+			<!-- Resumo do Usuário -->
+			<div class="col-md-4">
+				<div class="card h-100">
+					<div class="card-header bg-primary text-white">
+						<i class="fas fa-user me-2"></i>Meu Resumo
+					</div>
+					<div class="card-body">
+						<h5 id="nomeCompleto"></h5>
+						<p class="text-muted mb-0" id="cargoUsuario"></p>
+						<hr>
+						<div class="mb-2">
+							<i class="fas fa-calendar-check me-2 text-success"></i> <span
+								id="totalPedidos">0</span> pedidos realizados
+						</div>
+						<div class="mb-2">
+							<i class="fas fa-check-circle me-2 text-success"></i> <span
+								id="pedidosEntregues">0</span> entregues
+						</div>
+						<div>
+							<i class="fas fa-clock me-2 text-warning"></i> <span
+								id="pedidosPendentes">0</span> pendentes
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Gráfico de Pedidos por Status -->
+			<div class="col-md-8">
+				<div class="card h-100">
+					<div class="card-header bg-primary text-white">
+						<i class="fas fa-chart-pie me-2"></i>Meus Pedidos por Status
+					</div>
+					<div class="card-body">
+						<canvas id="pedidosStatusChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Histórico de Pedidos -->
+		<div class="row mt-4">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header bg-primary text-white">
+						<i class="fas fa-history me-2"></i>Últimos Pedidos
+					</div>
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table table-striped table-hover">
+								<thead>
+									<tr>
+										<th>ID</th>
+										<th>Data</th>
+										<th>Valor Total</th>
+										<th>Status</th>
+										<th>Código Entrega</th>
+										<th>Ações</th>
+									</tr>
+								</thead>
+								<tbody id="tabelaPedidos">
+									<tr>
+										<td colspan="6" class="text-center">Carregando pedidos...</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Modal de Detalhes do Pedido -->
+<div class="modal fade" id="detalhesPedidoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Detalhes do Pedido</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>ID do Pedido:</strong> <span id="pedidoId"></span></p>
+                        <p><strong>Vendedor:</strong> <span id="pedidoVendedor"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Data:</strong> <span id="pedidoData"></span></p>
+                        <p><strong>Status:</strong> <span id="pedidoStatus" class="badge"></span></p>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unitário</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidoItens">
+                            <!-- Itens serão preenchidos via JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong id="pedidoTotal"></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="baixarRelatorioPedido()">
+                    <i class="fas fa-download me-1"></i> Baixar Relatório
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+	<!-- Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<!-- Script do Dashboard -->
+	<script src="/js/user-dashboard.js"></script>
+
+</body>
+</html>

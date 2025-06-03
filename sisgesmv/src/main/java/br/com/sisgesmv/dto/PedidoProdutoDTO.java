@@ -1,6 +1,8 @@
 package br.com.sisgesmv.dto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -19,6 +21,8 @@ public class PedidoProdutoDTO {
 	@NotNull
 	@Positive(message = "A quantidade deve ser positiva.")
 	private Integer quantidade;
+	
+	
 	
 	public PedidoProdutoDTO(Long produtoId, String nomeProduto, BigDecimal precoUnitario, Integer quantidade) {
 	    this.produtoId = produtoId;

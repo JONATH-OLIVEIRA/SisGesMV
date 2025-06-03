@@ -64,6 +64,8 @@ public class SecurityConfig {
                 
                 // Rotas de administração
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/user/dashboard").hasRole("USER")
+                .requestMatchers("/user/pedidos").hasRole("USER")
                 
                 // Todas as outras rotas exigem autenticação
                 .anyRequest().authenticated()
