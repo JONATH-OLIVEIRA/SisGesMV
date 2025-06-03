@@ -1,0 +1,148 @@
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #1cc88a;
+    --accent-color: #36b9cc;
+    --dark-color: #5a5c69;
+    --light-color: #f8f9fc;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f7fb;
+    color: #333;
+}
+
+.navbar {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%) !important;
+}
+
+/* Estilos adicionais importantes */
+.icon-circle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.bg-primary-light {
+    background-color: rgba(78, 115, 223, 0.1);
+}
+
+.bg-success-light {
+    background-color: rgba(28, 200, 138, 0.1);
+}
+
+.bg-info-light {
+    background-color: rgba(54, 185, 204, 0.1);
+}
+
+/* Responsividade para sidebar */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1000;
+        width: 250px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Estilo para a data atual */
+#dataAtual {
+    font-weight: 500;
+}
+
+/* Estilos específicos para a página de pedidos */
+.product-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.product-card.selected {
+    border-left-color: var(--primary-color);
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+.quantity-control {
+    width: 120px;
+}
+
+#resumoPedido {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.resumo-item {
+    border-bottom: 1px solid #eee;
+    padding: 0.75rem 0;
+}
+
+.resumo-item:last-child {
+    border-bottom: none;
+}
+
+.total-pedido {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.modal-confirm {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.modal-confirm .modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Estilos específicos para a página de perfil */
+.profile-card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: none;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+    color: white;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.form-control:disabled {
+    background-color: #f8f9fc;
+}
+
+.password-toggle {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dark-color);
+}

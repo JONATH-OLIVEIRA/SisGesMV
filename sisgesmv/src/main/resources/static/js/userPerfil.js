@@ -136,3 +136,24 @@ function handleError(error) {
 document.getElementById('voltarBtn').addEventListener('click', function() {
 	window.location.href = '/user/dashboard';
 });
+
+
+// Sidebar toggle para mobile
+document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
+	document.querySelector('.sidebar').classList.toggle('show');
+});
+
+// Toggle para mostrar/esconder senha
+document.getElementById('togglePassword').addEventListener('click', function() {
+	const passwordInput = document.getElementById('senha');
+	const icon = this.querySelector('i');
+
+	if (passwordInput.type === 'password') {
+		passwordInput.type = 'text';
+		icon.classList.replace('fa-eye', 'fa-eye-slash');
+	} else {
+		passwordInput.type = 'password';
+		icon.classList.replace('fa-eye-slash', 'fa-eye');
+	}
+});
+

@@ -4,64 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Pedidos</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .product-row.selected {
-            background-color: #e6f7ff;
-        }
-        #resumoPedido {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .total-pedido {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #0d6efd;
-        }
-    </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="/css/userDashboard.css">
+    
 </head>
-<body class="bg-light">
-    <div class="container py-4">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">Sistema de Pedidos</a>
-            </div>
-        </nav>
-
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h2 class="mb-0">Seleção de Produtos</h2>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="tabelaProdutos">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Selecionar</th>
-                                <th>Nome</th>
-                                <th>Preço Unitário</th>
-                                <th>Estoque</th>
-                                <th>Quantidade</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaProdutos">
-                            <!-- Produtos serão carregados via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar d-none d-md-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+                <span class="fs-4 text-dark fw-bold">Sistema Vendas</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="/user/dashboard" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="/user/pedidos" class="nav-link active">
+                        <i class="fas fa-shopping-cart"></i>
+                        Novo Pedido
+                    </a>
+                </li>
+                <li>
+                    <a href="/user/userPerfil" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        Meu Perfil
+                    </a>
+                </li>
+            </ul>
+            <hr>
+            <div class="text-center text-muted small">
+                <div class="mb-2">Sistema de Pedidos</div>
+                <div>v1.0.0</div>
             </div>
         </div>
 
-        <div class="card shadow mt-4">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0">Resumo do Pedido</h3>
+        <!-- Main Content -->
+        <div class="flex-grow-1 p-4">
+            <!-- Top Navigation -->
+            <nav class="navbar navbar-expand navbar-light bg-white mb-4 shadow-sm rounded">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <span class="navbar-brand mb-0 h1">Novo Pedido</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="/images/user-avatar.jpg" alt="User" width="32" height="32" class="rounded-circle me-2">
+                                <strong id="nomeUsuarioNav">Usuário</strong>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
+                                <li><a class="dropdown-item" href="/user/perfil"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Card de Produtos -->
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-boxes me-2"></i>Seleção de Produtos</h3>
+                    <div class="input-group" style="width: 300px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Pesquisar produtos..." id="pesquisaProduto">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tabelaProdutos">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50px"></th>
+                                    <th>Produto</th>
+                                    <th class="text-end">Preço Unitário</th>
+                                    <th class="text-end">Estoque</th>
+                                    <th class="text-center">Quantidade</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaProdutos">
+                                <!-- Produtos serão carregados via JavaScript -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="mt-2">Carregando produtos...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="resumoPedido" class="mb-3"></div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="total-pedido">Total: R$ 0,00</h4>
-                    <button id="finalizarPedido" class="btn btn-primary btn-lg">Enviar Pedido para Aprovação</button>
+
+            <!-- Resumo do Pedido -->
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Resumo do Pedido</h3>
+                    <span class="badge bg-light text-dark"><i class="fas fa-cubes me-1"></i> <span id="totalItens">0</span> itens</span>
+                </div>
+                <div class="card-body">
+                    <div id="resumoPedido" class="mb-4">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-shopping-basket fa-2x mb-3"></i>
+                            <p>Selecione produtos para adicionar ao pedido</p>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <h4 class="total-pedido mb-0">Total: <span id="valorTotal">R$ 0,00</span></h4>
+                        <button id="finalizarPedido" class="btn btn-primary btn-lg" disabled>
+                            <i class="fas fa-paper-plane me-2"></i>Enviar Pedido
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,29 +140,42 @@
 
     <!-- Modal de Confirmação -->
     <div class="modal fade" id="confirmacaoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-confirm">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Pedido</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirmar Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-close="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Deseja realmente enviar este pedido para aprovação?</p>
-                    <div id="detalhesConfirmacao"></div>
+                    <p>Você está prestes a enviar o seguinte pedido para aprovação:</p>
+                    <div id="detalhesConfirmacao" class="bg-light p-3 rounded mb-3"></div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>Após o envio, o pedido precisará ser aprovado antes do processamento.
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="confirmarEnvio" class="btn btn-primary">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="button" id="confirmarEnvio" class="btn btn-primary">
+                        <i class="fas fa-check me-1"></i> Confirmar Envio
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS e jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Nosso script de pedidos -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Script de Pedidos -->
     <script src="/js/pedidos.js"></script>
+    <script>
+        // Sidebar toggle para mobile
+        document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+    </script>
 </body>
 </html>

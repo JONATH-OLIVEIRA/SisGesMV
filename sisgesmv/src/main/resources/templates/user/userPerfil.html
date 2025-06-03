@@ -2,65 +2,219 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Meu Perfil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil | Sistema de Vendas</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="/css/userDashboard.css">
+    
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/user/dashboard">User Dashboard</a>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar d-none d-md-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+                <span class="fs-4 text-dark fw-bold">Sistema Vendas</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="/user/dashboard" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="/user/pedidos" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        Meus Pedidos
+                    </a>
+                </li>
+                <li>
+                    <a href="/user/perfil" class="nav-link active">
+                        <i class="fas fa-user"></i>
+                        Meu Perfil
+                    </a>
+                </li>
+            </ul>
+            <hr>
+            <div class="text-center text-muted small">
+                <div class="mb-2">Sistema de Vendas</div>
+                <div>v1.0.0</div>
+            </div>
         </div>
-    </nav>
 
-    <div class="container mt-4">
-        <h2>Meu Perfil</h2>
+        <!-- Main Content -->
+        <div class="flex-grow-1 p-4">
+            <!-- Top Navigation -->
+            <nav class="navbar navbar-expand navbar-light bg-white mb-4 shadow-sm rounded">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <span class="navbar-brand mb-0 h1">Meu Perfil</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="/images/user-avatar.jpg" alt="User" width="32" height="32" class="rounded-circle me-2">
+                                <strong id="nomeUsuarioNav">Usuário</strong>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
+                                <li><a class="dropdown-item" href="/user/perfil"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
 
-        <form id="perfilForm">
-            <div id="error-message" class="alert alert-danger d-none mb-3"></div>
-            <div class="mb-3">
-                <label class="form-label">Nome:</label>
-                <input type="text" class="form-control" id="nome">
+            <!-- Profile Card -->
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card profile-card h-100">
+                        <div class="card-header profile-header">
+                            <h4 class="mb-0 text-center"><i class="fas fa-user-circle me-2"></i>Foto do Perfil</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="/images/user-profile.jpg" class="profile-picture mb-3" alt="Foto do perfil">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary">
+                                    <i class="fas fa-camera me-2"></i>Alterar Foto
+                                </button>
+                                <button class="btn btn-outline-danger">
+                                    <i class="fas fa-trash me-2"></i>Remover Foto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-8">
+                    <div class="card profile-card h-100">
+                        <div class="card-header profile-header">
+                            <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Informações Pessoais</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="perfilForm">
+                                <div id="error-message" class="alert alert-danger d-none mb-4"></div>
+                                <div id="success-message" class="alert alert-success d-none mb-4"></div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Nome Completo</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="nome" placeholder="Seu nome completo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Data de Nascimento</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                            <input type="date" class="form-control" id="dtNascimento">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="email" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">CPF</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                            <input type="text" class="form-control" id="cpf" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Usuário</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                        <input type="text" class="form-control" id="tipoUsuarioDisplay" disabled>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">Alterar Senha</label>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="senha" placeholder="Nova senha">
+                                        <span class="input-group-text password-toggle" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </span>
+                                    </div>
+                                    <div class="form-text">Deixe em branco para manter a senha atual</div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary me-2" id="voltarBtn">
+                                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" id="excluirContaBtn">
+                                            <i class="fas fa-trash-alt me-2"></i>Excluir Conta
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email:</label>
-                <input type="email" class="form-control" id="email" disabled>
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="confirmacaoExclusaoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir sua conta permanentemente? Esta ação não pode ser desfeita.</p>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-info-circle me-2"></i>Todos os seus dados e histórico serão removidos do sistema.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="button" id="confirmarExclusaoBtn" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Confirmar Exclusão
+                    </button>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">CPF:</label>
-                <input type="text" class="form-control" id="cpf" disabled>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Data de Nascimento:</label>
-                <input type="date" class="form-control" id="dtNascimento">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Tipo de Usuário:</label>
-                <input type="text" class="form-control" id="tipoUsuarioDisplay" disabled>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Nova Senha:</label>
-                <input type="password" class="form-control" id="senha">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-            <button type="button" class="btn btn-danger" id="excluirContaBtn">Excluir Conta</button>
-            <button id="voltarBtn" type="button" class="btn btn-warning">Voltar</button>
-        </form>
-        
-    <script src="/js/userPerfil.js"></script>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Script de Perfil -->
+    <script src="/js/userPerfil.js"></script>
    
 </body>
 </html>
